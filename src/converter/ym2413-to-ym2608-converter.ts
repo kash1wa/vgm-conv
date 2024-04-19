@@ -38,7 +38,8 @@ export class YM2413ToYM2608Converter extends VGMConverter {
   }
 
   getInitialCommands(): Array<VGMCommand> {
-    this._y(0, 0x22, 0x0b); // LFO ON 6.02Hz
+//  this._y(0, 0x22, 0x0b); // LFO ON 6.02Hz (for VIB)
+    this._y(0, 0x22, 0x08); // LFO ON 3.98Hz (for AM)
     this._y(0, 0x29, 0x80); // enable FM 4-6ch
     this._y(0, 0x11, 0x38); // Rhythm TL
     this._y(0, 0x18, 0xdf); // bd TL
