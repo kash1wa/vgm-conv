@@ -144,17 +144,9 @@ export class YM2413ToYM2608Converter extends VGMConverter {
       const voice = inst === 0 ? this._userVoice : ROM_VOICES[inst];
       const opnVoice = voice.opn;
       if (d & 32) {
-        for (let i = 0; i < 4; i++) {
-          if (opnVoice.slots[i].rr === 0 || opnVoice.slots[i].rr === 15) {
-            this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
-          } else {
-            this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | 5); // OPLL:1200ms, OPN:890~1248ms
-          }
-       }
+        this._y(port, 0x80 + 3 * 4 + nch, (opnVoice.slots[3].sl << 4) | 5); // only carrier
       } else {
-        for (let i = 0; i < 4; i++) {
-          this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
-        }
+        this._y(port, 0x80 + 3 * 4 + nch, (opnVoice.slots[3].sl << 4) | opnVoice.slots[3].rr);
       }
 
       const al = 0xa0 + nch;
