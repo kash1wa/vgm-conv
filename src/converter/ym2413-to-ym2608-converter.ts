@@ -145,17 +145,17 @@ export class YM2413ToYM2608Converter extends VGMConverter {
       const opnVoice = voice.opn;
       if (d & 32) {
         for (let i = 0; i < 4; i++) {
-				  if (opnVoice.slots[i].rr === 0 || opnVoice.slots[i].rr === 15) {
-	          this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
-	        } else {
-	          this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | 5); // OPLL:1200ms, OPN:890~1248ms
-	        }
-	      }
-			} else {
+          if (opnVoice.slots[i].rr === 0 || opnVoice.slots[i].rr === 15) {
+            this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
+          } else {
+            this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | 5); // OPLL:1200ms, OPN:890~1248ms
+          }
+       }
+      } else {
         for (let i = 0; i < 4; i++) {
-	        this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
-	      }
-			}
+          this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
+        }
+      }
 
       const al = 0xa0 + nch;
       const blk_fnum = ((d & 0xf) << 8) | this._regs[0x10 + ch];
