@@ -135,10 +135,27 @@ export class YM2413ToYM2608Converter extends VGMConverter {
       this._regs[a] = d;
       this._setSlotVolume(port, nch, blk_fnum, this._regs[0x30 + ch] & 0xf);
     } else if (0x20 <= a && a < 0x26) {
-      // BLOCK & F-Num 2
+      // SUS & BLOCK & F-Num 2
       const ch = a - 0x20;
       const port = ch < 3 ? 0 : 1;
       const nch = (3 <= ch ? ch + 1 : ch) & 3;
+
+      const inst = this._regs[0x30 + a - 0x20] >> 4;
+      const voice = inst === 0 ? this._userVoice : ROM_VOICES[inst];
+      const opnVoice = voice.opn;
+      if (d & 32) {
+        for (let i = 0; i < 4; i++) {
+				  if (opnVoice.slots[i].rr === 0 || opnVoice.slots[i].rr === 15) {
+	          this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
+	        } else {
+	          this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | 5); // OPLL:1200ms, OPN:890~1248ms
+	        }
+	      }
+			} else {
+        for (let i = 0; i < 4; i++) {
+	        this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
+	      }
+			}
 
       const al = 0xa0 + nch;
       const blk_fnum = ((d & 0xf) << 8) | this._regs[0x10 + ch];
