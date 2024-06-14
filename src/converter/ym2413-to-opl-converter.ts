@@ -62,7 +62,7 @@ export class YM2413ToOPLConverter extends VGMConverter {
     return this._buf.commit();
   }
 
-  _writeVoice(ch: number, v: OPLLVoice, modVolume: number | null, carVolume: number | null, key: boolean) {
+  _writeVoice(ch: number, v: OPLLVoice, modVolume: number | null, carVolume: number | null, key: boolean, sus: boolean) {
     const modOffset = getModOffset(ch);
     const carOffset = modOffset + 3;
     const mod = v.slots[0];
@@ -94,11 +94,19 @@ export class YM2413ToOPLConverter extends VGMConverter {
       },
       {
         a: 0x80 + modOffset,
-        d: (mod.sl << 4) | (!mod.eg ? _R(mod.rr) : 0)
+        d: (mod.sl << 4) | _R(key ? _R(mod.rr)
+                                  : sus ? _R(5)
+                                        : mod.eg ? 0
+                                                 : _R(6)
+                             )
       },
       {
         a: 0x80 + carOffset,
-        d: (car.sl << 4) | _R(car.eg || key ? _R(car.rr) : _R(6))
+        d: (car.sl << 4) | _R(key ? _R(car.rr)
+                                  : sus ? _R(5)
+                                        : car.eg ? _R(car.rr)
+                                                 : _R(6)
+                              )
       },
       {
         a: 0xc0 + ch,
@@ -119,23 +127,24 @@ export class YM2413ToOPLConverter extends VGMConverter {
     const volume = d & 0xf;
     const voice = inst === 0 ? OPLLVoice.decode(this._regs) : OPLLVoiceMap[inst];
     const key = this._regs[0x20 + ch] & 0x10 ? true : false;
+    const sus = this._regs[0x20 + ch] & 0x20 ? true : false;
 
     const toTL = (vol: number, off: number) => Math.max((vol << 2) - off, 0);
 
     if (this._rflag && 6 <= ch) {
       switch (ch) {
         case 6:
-          this._writeVoice(6, OPLLVoiceMap[16], null, toTL(volume, 0), key);
+          this._writeVoice(6, OPLLVoiceMap[16], null, toTL(volume, 0), key, sus);
           break;
         case 7:
-          this._writeVoice(7, OPLLVoiceMap[17], toTL(inst, 0), toTL(volume, 0), key);
+          this._writeVoice(7, OPLLVoiceMap[17], toTL(inst, 0), toTL(volume, 0), key, sus);
           break;
         case 8:
-          this._writeVoice(8, OPLLVoiceMap[18], toTL(inst, 0), toTL(volume, 0), key);
+          this._writeVoice(8, OPLLVoiceMap[18], toTL(inst, 0), toTL(volume, 0), key, sus);
           break;
       }
     } else {
-      this._writeVoice(ch, voice, null, toTL(volume, 0), key);
+      this._writeVoice(ch, voice, null, toTL(volume, 0), key, sus);
     }
   }
 
